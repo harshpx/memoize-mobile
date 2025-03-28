@@ -155,16 +155,18 @@ const LoginForm = () => {
         )}
       </FormControl>
 
-      <View className="w-full mt-6 flex flex-row items-center justify-center gap-2">
+      <View className="w-full mt-6 h-10 flex flex-row items-center justify-center gap-2">
         <AnimatedButton
           onPress={() => router.replace("/")}
-          outerClassName="w-[20%]"
+          outerClassName="w-[20%] h-full"
+          innerClassName="h-full"
         >
           <ChevronLeft color="black" size={20} />
         </AnimatedButton>
         <AnimatedButton
           onPress={handleSubmit(onSubmit)}
-          outerClassName="flex-grow"
+          outerClassName="flex-grow h-full"
+          innerClassName="h-full"
         >
           <Text className="text-black text-center">Login</Text>
           <ChevronRight color="black" size={20} />

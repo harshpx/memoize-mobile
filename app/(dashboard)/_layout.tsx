@@ -29,8 +29,10 @@ import {
 } from "lucide-react-native";
 import { useContext, useEffect, useState } from "react";
 import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DashboardLayout = () => {
+  const inset = useSafeAreaInsets();
   const pathname = usePathname();
   const { user, setUser, token, setToken, isOnline } = useContext(AppContext);
   const [showActionsheet, setShowActionsheet] = useState(false);
@@ -63,7 +65,10 @@ const DashboardLayout = () => {
   }, []);
 
   return (
-    <View className="flex-1 flex-col min-h-screen min-w-full bg-neutral-800">
+    <View
+      className="flex-1 flex-col min-h-screen min-w-full bg-neutral-800"
+      style={{ paddingBottom: inset.bottom }}
+    >
       {/* content */}
       <View className="flex-grow">
         <Stack
@@ -78,73 +83,71 @@ const DashboardLayout = () => {
         </Stack>
       </View>
       {/* footer */}
-      {!/^\/(notes|todos|checklists)\/[^/]+$/.test(pathname) && (
-        <View
-          className={`
-        w-full bg-black flex flex-row items-center justify-between px-6 shadow-lg
-        ${Platform.OS === "ios" ? "h-20 pb-6 pt-2" : "h-16 pb-2 pt-2"}
-      `}
-        >
-          <AnimatedButton
-            onPress={cloudPushHandler}
-            overrideStyles
-            innerClassName="rounded-full px-5 py-3 bg-neutral-800"
-          >
-            {!cloudPushing ? (
-              <CloudUpload color="#d4d4d4" size={20} />
-            ) : (
-              <Spinner color="white" size="small" />
-            )}
-          </AnimatedButton>
-          <View className="h-full flex flex-row items-center bg-neutral-800 rounded-full">
-            <Link href="/notes" replace asChild>
-              <TouchableOpacity
-                className={`flex flex-row items-center px-4 py-3 gap-2 rounded-full ${
-                  pathname === "/notes" ? "bg-neutral-300" : ""
-                }`}
-              >
-                <NotepadText
-                  color={pathname === "/notes" ? "black" : "#d4d4d4"}
-                  size={20}
-                />
-                <Text
-                  className={`${
-                    pathname === "/notes" ? "text-black" : "text-white"
-                  }`}
-                >
-                  Notes
-                </Text>
-              </TouchableOpacity>
-            </Link>
 
-            <Link href="/todos" replace asChild>
-              <TouchableOpacity
-                className={`flex flex-row items-center px-4 py-3 gap-2 rounded-full ${
-                  pathname === "/todos" ? "bg-neutral-300" : ""
+      <View
+        className={`w-full bg-black flex flex-row items-center justify-between px-6 shadow-lg h-16 py-2 ${
+          /^\/(notes|todos|checklists)\/[^/]+$/.test(pathname) ? "hidden" : ""
+        }`}
+      >
+        <AnimatedButton
+          onPress={cloudPushHandler}
+          overrideStyles
+          innerClassName="rounded-full px-5 py-3 bg-neutral-800"
+        >
+          {!cloudPushing ? (
+            <CloudUpload color="#d4d4d4" size={20} />
+          ) : (
+            <Spinner color="white" size="small" />
+          )}
+        </AnimatedButton>
+        <View className="h-full flex flex-row items-center bg-neutral-800 rounded-full">
+          <Link href="/notes" replace asChild>
+            <TouchableOpacity
+              className={`flex flex-row items-center px-4 py-3 gap-2 rounded-full ${
+                pathname === "/notes" ? "bg-neutral-300" : ""
+              }`}
+            >
+              <NotepadText
+                color={pathname === "/notes" ? "black" : "#d4d4d4"}
+                size={20}
+              />
+              <Text
+                className={`${
+                  pathname === "/notes" ? "text-black" : "text-white"
                 }`}
               >
-                <ListTodo
-                  color={pathname === "/todos" ? "black" : "#d4d4d4"}
-                  size={20}
-                />
-                <Text
-                  className={`${
-                    pathname === "/todos" ? "text-black" : "text-white"
-                  }`}
-                >
-                  Todos
-                </Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-          <TouchableOpacity onPress={() => setShowActionsheet(true)}>
-            <Avatar className="w-12 h-12">
-              <AvatarFallbackText>{user?.username}</AvatarFallbackText>
-              <AvatarImage source={{ uri: user?.avatar }} />
-            </Avatar>
-          </TouchableOpacity>
+                Notes
+              </Text>
+            </TouchableOpacity>
+          </Link>
+
+          <Link href="/todos" replace asChild>
+            <TouchableOpacity
+              className={`flex flex-row items-center px-4 py-3 gap-2 rounded-full ${
+                pathname === "/todos" ? "bg-neutral-300" : ""
+              }`}
+            >
+              <ListTodo
+                color={pathname === "/todos" ? "black" : "#d4d4d4"}
+                size={20}
+              />
+              <Text
+                className={`${
+                  pathname === "/todos" ? "text-black" : "text-white"
+                }`}
+              >
+                Todos
+              </Text>
+            </TouchableOpacity>
+          </Link>
         </View>
-      )}
+        <TouchableOpacity onPress={() => setShowActionsheet(true)}>
+          <Avatar className="w-12 h-12">
+            <AvatarFallbackText>{user?.username}</AvatarFallbackText>
+            <AvatarImage source={{ uri: user?.avatar }} />
+          </Avatar>
+        </TouchableOpacity>
+      </View>
 
       {/* drawer inside footer */}
       <Actionsheet

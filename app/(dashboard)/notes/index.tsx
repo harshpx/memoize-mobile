@@ -13,6 +13,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
+import AnimatedButton from "@/components/custom/AnimatedButton";
 
 const Note = ({ note }: any) => {
   const router = useRouter();
@@ -48,19 +49,27 @@ const CreateNoteButton = () => {
   }));
 
   return (
-    <Pressable
-      onPressIn={() => (scale.value = withSpring(0.9))}
-      onPressOut={() => (scale.value = withSpring(1))}
+    <AnimatedButton
+      overrideStyles
+      outerClassName="absolute bottom-5 right-5 z-10"
+      innerClassName="rounded-2xl border-2 border-[#d4d4d4] bg-black p-3 flex-row items-center justify-center"
       onPress={() => router.push("/notes/new")}
-      className="absolute bottom-5 right-5 z-10"
     >
-      <Animated.View
-        style={[animatedStyle]}
-        className="rounded-2xl border-2 border-[#d4d4d4] bg-black p-3 flex-row items-center justify-center"
-      >
-        <Plus size={24} color="#d4d4d4" />
-      </Animated.View>
-    </Pressable>
+      <Plus size={24} color="#d4d4d4" />
+    </AnimatedButton>
+    // <Pressable
+    //   onPressIn={() => (scale.value = withSpring(0.9))}
+    //   onPressOut={() => (scale.value = withSpring(1))}
+    //   onPress={() => router.push("/notes/new")}
+    //   className="absolute bottom-5 right-5 z-10"
+    // >
+    //   <Animated.View
+    //     style={[animatedStyle]}
+    //     className="rounded-2xl border-2 border-[#d4d4d4] bg-black p-3 flex-row items-center justify-center"
+    //   >
+    //     <Plus size={24} color="#d4d4d4" />
+    //   </Animated.View>
+    // </Pressable>
   );
 };
 
