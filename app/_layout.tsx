@@ -40,12 +40,12 @@ const RootLayout = () => {
                 backgroundColor: "black",
               },
             }}
-          >
-            <Stack.Screen name="index" />
+          />
+          {/* <Stack.Screen name="index" />
             <Stack.Screen name="auth" />
             <Stack.Screen name="(dashboard)" />
             <Stack.Screen name="no-internet" />
-          </Stack>
+          </Stack> */}
         </SafeAreaView>
         <StatusBar style="auto" hidden={false} />
       </GluestackUIProvider>

@@ -10,6 +10,7 @@ const AnimatedButton = ({
   children,
   outerClassName = "",
   innerClassName = "",
+  innerStyle = {},
   intensity = 0.9,
   overrideStyles = false,
 }: any) => {
@@ -26,7 +27,7 @@ const AnimatedButton = ({
       className={outerClassName}
     >
       <Animated.View
-        style={animatedStyle}
+        style={[animatedStyle, innerStyle]}
         className={`${
           overrideStyles
             ? `${innerClassName}`

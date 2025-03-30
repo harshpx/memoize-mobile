@@ -44,15 +44,15 @@ const KeyboardHandelingView: React.FC<KeyboardHandlingViewProps> = ({
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
+      <View style={{ flex: 1 }}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.inner}
+          style={{ flex: 1, backgroundColor: "black" }}
         >
           <View
             style={{
               flex: 1,
-              marginBottom: Platform.OS === "android" ? keyboardHeight : 0,
+              // marginBottom: Platform.OS === "android" ? keyboardHeight : 0,
             }}
           >
             {children}
@@ -62,15 +62,5 @@ const KeyboardHandelingView: React.FC<KeyboardHandlingViewProps> = ({
     </TouchableWithoutFeedback>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  inner: {
-    flex: 1,
-    backgroundColor: "black",
-  },
-});
 
 export default KeyboardHandelingView;

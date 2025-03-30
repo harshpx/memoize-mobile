@@ -9,12 +9,13 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/images/memoize.png"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/memoize.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#000000"
       },
       "package": "com.harshpx.memoize"
     },
