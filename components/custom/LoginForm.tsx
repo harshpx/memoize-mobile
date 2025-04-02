@@ -16,7 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { loginUser } from "@/utils/features";
 import { storage } from "@/utils/methods";
 import { AppContext } from "@/utils/AppContext";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import AnimatedButton from "./AnimatedButton";
@@ -154,7 +154,9 @@ const LoginForm = () => {
           </Text>
         )}
       </FormControl>
-
+      <Link href="/reset-password" className="mt-2">
+        <Text className="underline text-cyan-500 text-[11px]">Forgot password?</Text>
+      </Link>
       <View className="w-full mt-6 h-10 flex flex-row items-center justify-center gap-2">
         <AnimatedButton
           onPress={() => router.replace("/")}

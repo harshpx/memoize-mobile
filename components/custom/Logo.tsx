@@ -13,12 +13,12 @@ const Logo = ({ size, style }: { size: string; style: string }) => {
     >
       <NotebookPen
         color="white"
-        size={size === "sm" ? 20 : size === "md" ? 32 : 60}
+        size={size === "sm" ? 24 : size === "md" ? 40 : 60}
       />
       <Text
         className={`pt-1.5 text-white font-[600] ${
-          size === "sm" ? " text-lg font-[400]" : ""
-        }${size === "md" ? " text-2xl" : ""}${
+          size === "sm" ? " text-xl font-[400]" : ""
+        }${size === "md" ? " text-3xl" : ""}${
           size === "lg" ? " text-4xl" : ""
         }`}
       >

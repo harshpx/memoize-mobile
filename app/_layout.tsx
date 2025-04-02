@@ -8,7 +8,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import AppContextProvider from "@/utils/AppContext";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Platform, View } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,11 +40,6 @@ const RootLayout = () => {
               },
             }}
           />
-          {/* <Stack.Screen name="index" />
-            <Stack.Screen name="auth" />
-            <Stack.Screen name="(dashboard)" />
-            <Stack.Screen name="no-internet" />
-          </Stack> */}
         </SafeAreaView>
         <StatusBar style="auto" hidden={false} />
       </GluestackUIProvider>

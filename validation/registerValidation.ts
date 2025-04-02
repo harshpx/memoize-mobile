@@ -9,7 +9,7 @@ export const usernameValidation = z
       "Username should contain only letters, numbers, underscores and dots",
   });
 
-export const emailValidation = z.string().email();
+export const emailValidation = z.string().email({message: "Invalid email address"});
 
 export const registerSchema = z
   .object({

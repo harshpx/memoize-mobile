@@ -1,6 +1,6 @@
 import { Button, ButtonText } from "@/components/ui/button";
 import { Fab, FabIcon, FabLabel } from "@/components/ui/fab";
-import { Pressable } from "react-native";
+import { Pressable, RefreshControl } from "react-native";
 import { Text } from "@/components/ui/text";
 import { AppContext } from "@/utils/AppContext";
 import { storage } from "@/utils/methods";
@@ -9,6 +9,7 @@ import { Pin, Plus } from "lucide-react-native";
 import { useContext, useEffect, useState } from "react";
 import { ScrollView, Platform, View } from "react-native";
 import AnimatedButton from "@/components/custom/AnimatedButton";
+import { syncNotes } from "@/utils/features";
 
 const Note = ({ note }: any) => {
   const router = useRouter();
@@ -50,11 +51,29 @@ const CreateNoteButton = () => {
 
 const NotesPage = () => {
   const router = useRouter();
-  const { user, setUser, setToken } = useContext(AppContext);
+  const { user, setUser, token, isOnline } = useContext(AppContext);
   const [isMounted, setIsMounted] = useState(false);
 
   const [pinnedNotes, setPinnedNotes] = useState<any>([]);
   const [unpinnedNotes, setUnpinnedNotes] = useState<any>([]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refreshHandler = async () => {
+    setRefreshing(true);
+    if (isOnline) {
+      try {
+        const response = await syncNotes(user?.notes, token);
+        if (response.success) {
+          await storage.set("user", { ...user, notes: response.notes });
+          setUser({ ...user, notes: response.notes });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -79,6 +98,9 @@ const NotesPage = () => {
     <View className={`w-full bg-neutral-800 flex-1 flex-grow`}>
       <CreateNoteButton />
       <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refreshHandler} />
+        }
         contentContainerClassName={`flex-col gap-4 items-center justify-start ${
           Platform.OS === "ios" ? "pt-20 pb-4 px-4" : "pt-12 pb-2 px-5"
         }`}

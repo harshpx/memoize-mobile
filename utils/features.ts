@@ -139,3 +139,14 @@ export const syncUserData = async (user: Object, token: string) => {
   });
   return await response.json();
 };
+
+export const sendResetPasswordEmail = async (email: string) => {
+  const response = await fetch(`${BASE_URL}/user/send-reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+  return await response.json();
+};
