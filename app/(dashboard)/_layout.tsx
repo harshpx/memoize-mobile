@@ -29,7 +29,3 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
-
-// ${
-//   /^\/(notes|todos|checklists)\/[^/]+$/.test(pathname) ? "hidden" : ""
-// }

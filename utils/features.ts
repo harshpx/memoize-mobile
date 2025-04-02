@@ -110,8 +110,8 @@ export const updateAvatar = async (avatar: string, token: string) => {
 // @returns {Promise}
 // @protected true
 // @description Push notes to server
-export const pushNotes = async (notes: Array<Object>, token: string) => {
-  const response = await fetch(`${BASE_URL}/note/push`, {
+export const syncNotes = async (notes: Array<Object>, token: string) => {
+  const response = await fetch(`${BASE_URL}/note/sync`, {
     method: "PUT",
     headers: {
       Authorization: "Bearer " + token,
@@ -128,7 +128,7 @@ export const pushNotes = async (notes: Array<Object>, token: string) => {
 // @returns {Promise}
 // @protected true
 // @description Push user data to server
-export const pushUserData = async (user: Object, token: string) => {
+export const syncUserData = async (user: Object, token: string) => {
   const response = await fetch(`${BASE_URL}/user/sync`, {
     method: "PUT",
     headers: {

@@ -53,9 +53,20 @@ const NotesPage = () => {
   const { user, setUser, setToken } = useContext(AppContext);
   const [isMounted, setIsMounted] = useState(false);
 
+  const [pinnedNotes, setPinnedNotes] = useState<any>([]);
+  const [unpinnedNotes, setUnpinnedNotes] = useState<any>([]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    const displayNotes = user?.notes
+      ?.reverse()
+      ?.filter((note: any) => !note.deleted);
+    setPinnedNotes(displayNotes?.filter((note: any) => note?.pinned) || []);
+    setUnpinnedNotes(displayNotes?.filter((note: any) => !note?.pinned) || []);
+  }, [user]);
 
   // logout or no user redirect
   useEffect(() => {
@@ -72,7 +83,7 @@ const NotesPage = () => {
           Platform.OS === "ios" ? "pt-20 pb-4 px-4" : "pt-12 pb-2 px-5"
         }`}
       >
-        {user?.notes?.length === 0 ? (
+        {pinnedNotes.length === 0 && unpinnedNotes.length === 0 ? (
           <View className="mt-[20rem] flex-col items-center justify-center gap-2">
             <Text className="text-white text-2xl">No notes found</Text>
             <Text className="text-neutral-400 text-sm">
@@ -82,14 +93,13 @@ const NotesPage = () => {
         ) : (
           <View className="w-full flex-col gap-5">
             {/* pinned */}
-            {user?.notes?.filter((note: any) => note?.pinned)?.length > 0 && (
+            {pinnedNotes.length > 0 && (
               <View className="flex-col gap-2">
                 <Text className="w-full text-white text-lg">Pinned</Text>
                 <View className="flex-row w-full gap-4">
                   {/* Left Column */}
                   <View className="flex-1 gap-4">
-                    {user?.notes
-                      ?.filter((note: any) => note?.pinned)
+                    {pinnedNotes
                       ?.filter((_: any, i: number) => i % 2 === 0)
                       ?.map((note: any) => (
                         <Note key={note.id} note={note} />
@@ -97,8 +107,7 @@ const NotesPage = () => {
                   </View>
                   {/* Right Column */}
                   <View className="flex-1 gap-4">
-                    {user?.notes
-                      ?.filter((note: any) => note?.pinned)
+                    {pinnedNotes
                       ?.filter((_: any, i: number) => i % 2 !== 0)
                       ?.map((note: any) => (
                         <Note key={note.id} note={note} />
@@ -108,14 +117,13 @@ const NotesPage = () => {
               </View>
             )}
             {/* unpinned */}
-            {user?.notes?.filter((note: any) => !note?.pinned)?.length > 0 && (
+            {unpinnedNotes.length > 0 && (
               <View className="flex-col gap-2">
                 <Text className="w-full text-white text-lg">Unpinned</Text>
                 <View className="flex-row w-full gap-4">
                   {/* Left Column */}
                   <View className="flex-1 gap-4">
-                    {user?.notes
-                      ?.filter((note: any) => !note?.pinned)
+                    {unpinnedNotes
                       ?.filter((_: any, i: number) => i % 2 === 0)
                       ?.map((note: any) => (
                         <Note key={note.id} note={note} />
@@ -123,8 +131,7 @@ const NotesPage = () => {
                   </View>
                   {/* Right Column */}
                   <View className="flex-1 gap-4">
-                    {user?.notes
-                      ?.filter((note: any) => !note?.pinned)
+                    {unpinnedNotes
                       ?.filter((_: any, i: number) => i % 2 !== 0)
                       ?.map((note: any) => (
                         <Note key={note.id} note={note} />

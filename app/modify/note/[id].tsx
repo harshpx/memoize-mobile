@@ -2,7 +2,7 @@ import AnimatedButton from "@/components/custom/AnimatedButton";
 import ColorSelector from "@/components/custom/ColorSelector";
 import KeyboardHandelingView from "@/components/custom/KeyboardHandelingView";
 import { AppContext } from "@/utils/AppContext";
-import { pushNotes } from "@/utils/features";
+import { syncNotes } from "@/utils/features";
 import { storage } from "@/utils/methods";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { Code, Pin, PinOff, Trash } from "lucide-react-native";
@@ -14,31 +14,32 @@ const Note = () => {
   const navigation = useNavigation();
   const { user, setUser, token, isOnline } = useContext(AppContext);
 
+  const noteToBeUpdated = user?.notes?.find(
+    (note: any) => note.id === id.toString(),
+  );
+
   const newNote = {
     id:
+      noteToBeUpdated?.id ||
       "note-" +
-      Math.random().toString(36).substring(2) +
-      "-" +
-      Math.random().toString(36).substring(2) +
-      "-" +
-      Math.random().toString(36).substring(2),
-    title: "",
-    content: "",
-    color: "#171717",
-    pinned: false,
-    status: "active",
-    updatedAt: new Date(),
+        Math.random().toString(36).substring(2) +
+        "-" +
+        Math.random().toString(36).substring(2) +
+        "-" +
+        Math.random().toString(36).substring(2),
+    title: noteToBeUpdated?.title || "",
+    content: noteToBeUpdated?.content || "",
+    color: noteToBeUpdated?.color || "#171717",
+    pinned: noteToBeUpdated?.pinned || false,
+    deleted: noteToBeUpdated?.deleted || false,
+    status: noteToBeUpdated?.status || "active",
+    updatedAt: noteToBeUpdated?.updatedAt || new Date(),
   };
 
-  const currNote =
-    id.toString() === "new"
-      ? newNote
-      : user?.notes?.find((note: any) => note.id === id.toString());
-
-  const [title, setTitle] = useState(currNote?.title);
-  const [content, setContent] = useState(currNote?.content);
-  const [color, setColor] = useState(currNote?.color);
-  const [pinned, setPinned] = useState(currNote?.pinned);
+  const [title, setTitle] = useState(newNote?.title);
+  const [content, setContent] = useState(newNote?.content);
+  const [color, setColor] = useState(newNote?.color);
+  const [pinned, setPinned] = useState(newNote?.pinned);
 
   useEffect(() => {
     const goBackTrigger = navigation.addListener("beforeRemove", updateHandler);
@@ -46,12 +47,13 @@ const Note = () => {
   }, [navigation, title, content, color, pinned]);
 
   const updateHandler = async () => {
+    newNote.title = title;
+    newNote.content = content;
+    newNote.color = color;
+    newNote.pinned = pinned;
+    newNote.updatedAt = new Date();
+
     try {
-      newNote.title = title;
-      newNote.content = content;
-      newNote.color = color;
-      newNote.pinned = pinned;
-      newNote.updatedAt = new Date();
       // if new note is to be created
       if (id.toString() === "new") {
         // no title and no content, return
@@ -61,43 +63,80 @@ const Note = () => {
         await storage.set("user", { ...user, notes: updatedNotes });
         setUser({ ...user, notes: updatedNotes });
         if (isOnline) {
-          await pushNotes(updatedNotes, token);
+          const response = await syncNotes(updatedNotes, token);
+          if (response.success) {
+            await storage.set("user", { ...user, notes: response.notes });
+            setUser({ ...user, notes: response.notes });
+          }
         }
       }
       // else if note is to be updated
       else {
         // if no title and no content, delete the note
         if (!newNote.title && !newNote.content) {
-          const updatedNotes = user?.notes.filter(
-            (note: any) => note.id !== id,
+          const updatedNotes = user?.notes.map((note: any) =>
+            note.id === id
+              ? { ...note, deleted: true, updatedAt: new Date() }
+              : note,
           );
           await storage.set("user", { ...user, notes: updatedNotes });
           setUser({ ...user, notes: updatedNotes });
           if (isOnline) {
-            await pushNotes(updatedNotes, token);
+            const response = await syncNotes(updatedNotes, token);
+            if (response.success) {
+              await storage.set("user", { ...user, notes: response.notes });
+              setUser({ ...user, notes: response.notes });
+            }
           }
           return;
         }
         // else update the note
         // if the note is not changed, return
         if (
-          newNote.title === currNote?.title &&
-          newNote.content === currNote?.content &&
-          newNote.color === currNote?.color &&
-          newNote.pinned === currNote?.pinned
+          newNote.title === noteToBeUpdated?.title &&
+          newNote.content === noteToBeUpdated?.content &&
+          newNote.color === noteToBeUpdated?.color &&
+          newNote.pinned === noteToBeUpdated?.pinned
         ) {
           return;
         }
         // else update the note
-        const updatedNotes = user?.notes.map((note: any) =>
+        const updatedNotes = user?.notes?.map((note: any) =>
           note.id === id ? newNote : note,
         );
         await storage.set("user", { ...user, notes: updatedNotes });
         setUser({ ...user, notes: updatedNotes });
         if (isOnline) {
-          await pushNotes(updatedNotes, token);
+          const response = await syncNotes(updatedNotes, token);
+          if (response.success) {
+            await storage.set("user", { ...user, notes: response.notes });
+            setUser({ ...user, notes: response.notes });
+          }
         }
       }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const deleteNoteHandler = async () => {
+    try {
+      const updatedNotes = user?.notes.map((note: any) =>
+        note.id === id
+          ? { ...note, deleted: true, updatedAt: new Date() }
+          : note,
+      );
+      navigation.goBack();
+      await storage.set("user", { ...user, notes: updatedNotes });
+      setUser({ ...user, notes: updatedNotes });
+      if (isOnline) {
+        const response = await syncNotes(updatedNotes, token);
+        if (response.success) {
+          await storage.set("user", { ...user, notes: response.notes });
+          setUser({ ...user, notes: response.notes });
+        }
+      }
+      return;
     } catch (error) {
       console.log(error);
     }
@@ -163,15 +202,15 @@ const Note = () => {
               <PinOff color="white" size={20} />
             )}
           </AnimatedButton>
-          <AnimatedButton
-            overrideStyles
-            innerClassName="px-4 py-3 rounded-full bg-neutral-800"
-            onPress={() => {
-              setPinned((prev: boolean) => !prev);
-            }}
-          >
-            <Trash color="white" size={20} />
-          </AnimatedButton>
+          {id.toString() !== "new" && (
+            <AnimatedButton
+              overrideStyles
+              innerClassName="px-4 py-3 rounded-full bg-neutral-800"
+              onPress={deleteNoteHandler}
+            >
+              <Trash color="white" size={20} />
+            </AnimatedButton>
+          )}
         </View>
       </View>
     </KeyboardHandelingView>

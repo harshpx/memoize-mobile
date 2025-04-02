@@ -15,7 +15,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { AppContext } from "@/utils/AppContext";
-import { pushNotes, pushUserData } from "@/utils/features";
+import { syncNotes, syncUserData } from "@/utils/features";
 import { storage } from "@/utils/methods";
 import { Link, Stack, usePathname } from "expo-router";
 import {
@@ -49,13 +49,18 @@ const Footer = () => {
     if (!user || !token) return;
     try {
       setCloudPushing(true);
-      await pushUserData(user, token);
+      const response = await syncUserData(user, token);
+      if (response.success) {
+        await storage.set("user", response.user);
+        setUser(response.user);
+      }
     } catch (error) {
       console.log(error);
     } finally {
       setCloudPushing(false);
     }
   };
+  // sync on mount
   useEffect(() => {
     if (isOnline && user) {
       cloudPushHandler();
@@ -119,7 +124,7 @@ const Footer = () => {
         <TouchableOpacity onPress={() => setShowActionsheet(true)}>
           <Avatar className="w-12 h-12">
             <AvatarFallbackText>{user?.username}</AvatarFallbackText>
-            <AvatarImage source={{ uri: user?.avatar }} />
+            <AvatarImage source={{ uri: user?.avatar?.url }} />
           </Avatar>
         </TouchableOpacity>
       </View>
@@ -136,7 +141,7 @@ const Footer = () => {
             <View className="relative">
               <Avatar className="w-40 h-40">
                 <AvatarFallbackText>{user?.username}</AvatarFallbackText>
-                <AvatarImage source={{ uri: user?.avatar }} />
+                <AvatarImage source={{ uri: user?.avatar?.url }} />
               </Avatar>
               <View className="absolute bottom-2 right-2">
                 <AvatarSelector />

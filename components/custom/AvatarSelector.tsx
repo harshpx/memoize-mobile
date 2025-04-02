@@ -23,12 +23,20 @@ const AvatarSelector = () => {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   const changeAvatar = async (url: string) => {
-    await storage.set("user", { ...user, avatar: url });
-    setUser({ ...user, avatar: url });
+    const newAvatar = {
+      url,
+      updatedAt: new Date(),
+    };
+    await storage.set("user", { ...user, avatar: newAvatar });
+    setUser({ ...user, avatar: newAvatar });
     setShowAvatarModal(false);
     if (isOnline) {
       try {
-        await updateAvatar(url, token);
+        const response = await updateAvatar(url, token);
+        if (response.success) {
+          await storage.set("user", { ...user, avatar: response.avatar });
+          setUser({ ...user, avatar: response.avatar });
+        }
       } catch (error) {
         console.error(error);
       }
