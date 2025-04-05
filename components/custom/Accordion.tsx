@@ -6,6 +6,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
+import * as Haptics from "expo-haptics";
 
 interface AccordionProps {
   children: React.ReactElement<AccordionItemProps>[];
@@ -50,6 +51,8 @@ export const AccordionItem = ({
   }));
 
   useEffect(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     maxHeight.value = withTiming(isOpen ? 1000 : 0, {
       duration: 500,
     });
@@ -60,7 +63,7 @@ export const AccordionItem = ({
       {/* Trigger */}
       <Pressable
         onPress={onToggle}
-        className="flex-row justify-between items-center px-1 py-2"
+        className={`flex-row justify-between items-center px-2 py-2 rounded-xl ${isOpen ? "bg-neutral-700" : ""}`}
       >
         <Text className="text-white font-semibold text-base font-poppins pb-[0.7px]">
           {title}

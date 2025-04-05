@@ -9,6 +9,7 @@ import { useLocalSearchParams, useNavigation } from "expo-router";
 import { ChevronLeft, Code, Pin, PinOff, Trash } from "lucide-react-native";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Platform, View, ScrollView, TextInput } from "react-native";
+import * as Haptics from "expo-haptics";
 
 const Note = () => {
   const { id } = useLocalSearchParams();
@@ -47,12 +48,8 @@ const Note = () => {
     return () => goBackTrigger();
   }, [navigation, title, content, color, pinned]);
 
-  const goBackHandler = async () => {
-    navigation.goBack();
-    await updateHandler();
-  };
-
   const updateHandler = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     newNote.title = title;
     newNote.content = content;
     newNote.color = color;
@@ -65,7 +62,7 @@ const Note = () => {
         // no title and no content, return
         if (!newNote.title && !newNote.content) return;
         // else create a new note
-        const updatedNotes = [...user?.notes, newNote];
+        const updatedNotes = [newNote, ...user?.notes];
         await storage.set("user", { ...user, notes: updatedNotes });
         setUser({ ...user, notes: updatedNotes });
         if (isOnline) {
@@ -75,10 +72,9 @@ const Note = () => {
             setUser({ ...user, notes: response.notes });
           }
         }
-      }
-      // else if note is to be updated
+      } // else note is to be updated
       else {
-        // if no title and no content, delete the note
+        // if no title and no content, delete the note (soft delete)
         if (!newNote.title && !newNote.content) {
           const updatedNotes = user?.notes.map((note: any) =>
             note.id === id
@@ -107,9 +103,9 @@ const Note = () => {
           return;
         }
         // else update the note
-        const updatedNotes = user?.notes?.map((note: any) =>
-          note.id === id ? newNote : note,
-        );
+        const updatedNotes = user?.notes?.filter((note: any) => note.id !== id); // remove the note from the list
+        updatedNotes.unshift(newNote); // add the updated note to the top of the list
+        // simiar to -> updatedNotes = [...updatedNotes, newNote] but better;
         await storage.set("user", { ...user, notes: updatedNotes });
         setUser({ ...user, notes: updatedNotes });
         if (isOnline) {
@@ -148,16 +144,21 @@ const Note = () => {
     }
   };
 
+  const goBackHandler = async () => {
+    navigation.goBack();
+    await updateHandler();
+  };
+
   return (
     <KeyboardHandelingView>
       <View className="flex-1 w-full" style={{ backgroundColor: color }}>
         <ScrollView
-          className={`w-full flex-1 ${
+          className={`w-full ${
             Platform.OS === "ios" ? "pt-20 pb-4 px-4" : "pt-16 pb-4 px-5"
           }`}
           // keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
-          contentContainerClassName="flex-1 gap-4 pb-[100px]"
+          contentContainerClassName="gap-4 pb-[100px]"
         >
           <AnimatedButton
             onPress={goBackHandler}

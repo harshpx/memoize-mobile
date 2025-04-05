@@ -4,6 +4,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 
 const AnimatedButton = ({
   onPress,
@@ -24,7 +25,12 @@ const AnimatedButton = ({
     <Pressable
       onPressIn={() => (scale.value = withSpring(intensity))}
       onPressOut={() => (scale.value = withSpring(1))}
-      onPress={onPress}
+      onPress={() => {
+        if (!disabled) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          onPress?.();
+        }
+      }}
       className={outerClassName}
       disabled={disabled}
     >
@@ -33,7 +39,9 @@ const AnimatedButton = ({
         className={`${
           overrideStyles
             ? `${disabled ? " opacity-70" : ""}${innerClassName}`
-            : `${disabled ? " opacity-70" : ""} rounded-xl py-2 px-3 bg-neutral-300 flex-row items-center justify-center ${innerClassName}`
+            : `${
+                disabled ? " opacity-70" : ""
+              } rounded-xl py-2 px-3 bg-neutral-300 flex-row items-center justify-center ${innerClassName}`
         }`}
       >
         {children}

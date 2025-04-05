@@ -1,5 +1,4 @@
 import AnimatedButton from "@/components/custom/AnimatedButton";
-import AvatarSelector from "@/components/custom/AvatarSelector";
 import {
   Actionsheet,
   ActionsheetBackdrop,
@@ -15,21 +14,19 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { AppContext } from "@/utils/AppContext";
-import { syncNotes, syncUserData } from "@/utils/features";
+import { syncUserData } from "@/utils/features";
 import { storage } from "@/utils/methods";
-import { Link, Stack, usePathname, useRouter } from "expo-router";
+import { Link, usePathname, useRouter } from "expo-router";
 import {
   CloudUpload,
   ListTodo,
   LogOut,
   NotepadText,
-  Palette,
-  Pin,
   Settings,
-  Trash,
 } from "lucide-react-native";
 import { useContext, useEffect, useState } from "react";
-import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import * as Haptics from "expo-haptics";
 
 const Footer = () => {
   const pathname = usePathname();
@@ -88,6 +85,11 @@ const Footer = () => {
               className={`flex flex-row items-center px-4 py-3 gap-2 rounded-full ${
                 pathname === "/notes" ? "bg-neutral-300" : ""
               }`}
+              onPress={() => {
+                if (pathname !== "/notes") {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+              }}
             >
               <NotepadText
                 color={pathname === "/notes" ? "black" : "#d4d4d4"}
@@ -108,6 +110,11 @@ const Footer = () => {
               className={`flex flex-row items-center px-4 py-3 gap-2 rounded-full ${
                 pathname === "/todos" ? "bg-neutral-300" : ""
               }`}
+              onPress={() => {
+                if (pathname !== "/todos") {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+              }}
             >
               <ListTodo
                 color={pathname === "/todos" ? "black" : "#d4d4d4"}
@@ -123,7 +130,12 @@ const Footer = () => {
             </TouchableOpacity>
           </Link>
         </View>
-        <TouchableOpacity onPress={() => setShowActionsheet(true)}>
+        <TouchableOpacity
+          onPress={() => {
+            setShowActionsheet(true);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          }}
+        >
           <Avatar className="w-12 h-12">
             <AvatarFallbackText>{user?.username}</AvatarFallbackText>
             <AvatarImage source={{ uri: user?.avatar?.url }} />
@@ -148,24 +160,28 @@ const Footer = () => {
             </View>
             <View className="flex-col items-center justify-center">
               <Text className="text-3xl">Hi {user?.username}!</Text>
-              <Text className="text-neutral-400">{`(${user?.email})`}</Text>
+              <Text className="text-neutral-400 text-sm">{user?.email}</Text>
             </View>
             <View className="flex-row gap-2">
-              <AnimatedButton innerClassName="w-24">
+              <AnimatedButton onPress={cloudPushHandler} innerClassName="w-24 gap-1">
                 <Text className="text-black text-sm">Sync</Text>
-                <CloudUpload color="black" size={18} />
+                {!cloudPushing ? (
+                  <CloudUpload color="black" size={18} />
+                ) : (
+                  <Spinner color="black" size="small" />
+                )}
               </AnimatedButton>
               <AnimatedButton
                 onPress={() => {
                   setShowActionsheet(false);
                   router.push("/settings");
                 }}
-                innerClassName="w-24"
+                innerClassName="w-24 gap-1"
               >
                 <Text className="text-black text-sm">Settings</Text>
                 <Settings color="black" size={18} />
               </AnimatedButton>
-              <AnimatedButton onPress={logoutHandler} innerClassName="w-24">
+              <AnimatedButton onPress={logoutHandler} innerClassName="w-24 gap-1">
                 <Text className="text-black text-sm">Logout</Text>
                 <LogOut color="black" size={18} />
               </AnimatedButton>

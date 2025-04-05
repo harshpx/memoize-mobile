@@ -8,12 +8,12 @@ import {
 } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { AppContext } from "@/utils/AppContext";
-import { useNavigation } from "expo-router";
-import { ChevronDown, ChevronLeft, ChevronUp } from "lucide-react-native";
+import { useNavigation, useRouter } from "expo-router";
+import { ChevronLeft, LogOut, Trash2 } from "lucide-react-native";
 import { useContext, useEffect, useState } from "react";
 import { Platform, ScrollView, TextInput, View } from "react-native";
 import { Accordion, AccordionItem } from "@/components/custom/Accordion";
-import { z } from "zod";
+import { set, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import useDebounce from "@/hooks/useDebounce";
@@ -24,6 +24,7 @@ import {
 import {
   checkEmailAvailability,
   checkUsernameAvailability,
+  deleteUser,
   updateEmail,
   updatePassword,
   updateUsername,
@@ -36,6 +37,15 @@ import {
 import { Input, InputField } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { storage } from "@/utils/methods";
+import {
+  Modal,
+  ModalBackdrop,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+} from "@/components/ui/modal";
+import { CommonActions } from "@react-navigation/native";
 
 const usernameFormSchema = z.object({
   username: usernameValidation,
@@ -64,6 +74,8 @@ type PasswordChangeFormData = z.infer<typeof passwordChangeFormSchema>;
 
 const Settings = () => {
   const navigation = useNavigation();
+  const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
   const { user, setUser, token, setToken } = useContext(AppContext);
 
   const [loading, setLoading] = useState(false);
@@ -77,6 +89,25 @@ const Settings = () => {
   // vars for managing email changes
   const [emailMessage, setEmailMessage] = useState("");
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [deleteString, setDeleteString] = useState("");
+  const [deleteResponseMessage, setDeleteResponseMessage] = useState("");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && !user) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: "(dashboard)" }],
+        }),
+      );
+    }
+  }, [isMounted, user]);
 
   // username form controller
   const usernameFormController = useForm<UsernameFormData>({
@@ -253,6 +284,44 @@ const Settings = () => {
     }
   };
 
+  // logout handler
+  const logoutHandler = async () => {
+    await storage.remove("user");
+    await storage.remove("token");
+    setUser(null);
+    setToken(null);
+  };
+
+  // delete account handler
+  const deleteAccountHandler = async () => {
+    if (deleteString !== "DELETE") {
+      setDeleteResponseMessage("Please type DELETE to confirm");
+      return;
+    }
+    try {
+      setShowDeleteAccountModal(false);
+      setLoading(true);
+      const response = await deleteUser(token);
+      if (response?.success) {
+        await storage.remove("user");
+        await storage.remove("token");
+        setUser(null);
+        setToken(null);
+        setDeleteResponseMessage(response?.message);
+      } else {
+        setDeleteResponseMessage(response?.message);
+        setUpdateResponseMessage(response?.message);
+        setUpdateResponseError(true);
+      }
+    } catch (error) {
+      setDeleteResponseMessage("Failed to delete account");
+      setUpdateResponseMessage("Failed to delete account");
+      setUpdateResponseError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <KeyboardHandelingView>
       <View
@@ -274,13 +343,14 @@ const Settings = () => {
             Settings
           </Text>
         </View>
+        {/* spinner */}
         {loading && (
-          <View className="z-10 absolute left-0 top-0 opacity-60 bg-black h-screen w-full flex flex-row items-center justify-center">
+          <View className="z-50 absolute left-0 top-0 opacity-60 bg-black h-screen w-full flex flex-row items-center justify-center">
             <Spinner size="large" color="white" />
           </View>
         )}
         <ScrollView
-          contentContainerClassName="pb-[100px]"
+          contentContainerClassName="pb-[100px] flex-col gap-2 items-center"
           keyboardShouldPersistTaps="handled"
         >
           {/* Avatar and account info */}
@@ -352,7 +422,8 @@ const Settings = () => {
                       outerClassName="w-fit"
                       disabled={
                         usernameFormController.formState.errors.username ||
-                        isCheckingUsername
+                        isCheckingUsername ||
+                        !usernameFormController.getValues("username")
                           ? true
                           : false
                       }
@@ -424,7 +495,8 @@ const Settings = () => {
                     outerClassName="w-fit"
                     disabled={
                       emailFormController.formState.errors?.email ||
-                      isCheckingEmail
+                      isCheckingEmail ||
+                      !emailFormController.getValues("email")
                         ? true
                         : false
                     }
@@ -623,6 +695,88 @@ const Settings = () => {
               </AccordionItem>
             </Accordion>
           </View>
+          {/* other buttons */}
+          <View className="mt-24 flex-row gap-2">
+            <AnimatedButton
+              onPress={logoutHandler}
+              innerClassName="w-fit gap-1"
+            >
+              <Text className="text-black text-sm">Logout</Text>
+              <LogOut color="black" size={18} />
+            </AnimatedButton>
+            <AnimatedButton
+              onPress={() => setShowDeleteAccountModal(true)}
+              overrideStyles
+              innerClassName="w-fit gap-1 rounded-xl py-2 px-3 bg-red-500 flex-row items-center justify-center"
+            >
+              <Text className="text-white text-sm">Delete account</Text>
+              <Trash2 color="white" size={18} />
+            </AnimatedButton>
+          </View>
+
+          {/* delete account modal */}
+          <Modal
+            isOpen={showDeleteAccountModal}
+            onClose={() => setShowDeleteAccountModal(false)}
+            size="md"
+            className={`${Platform.OS === "ios" ? "-mt-20" : ""}`}
+          >
+            <ModalBackdrop />
+            <ModalContent className="bg-black border shadow-lg rounded-2xl">
+              <ModalCloseButton />
+              <ModalHeader className="flex-row items-center justify-center">
+                <Text className="text-white py-4 text-xl font-semibold">
+                  Are you sure?
+                </Text>
+              </ModalHeader>
+              <ModalBody className="w-full">
+                <Text className="text-red-500 text-sm">
+                  NOTE: This will completely wipe ALL your data, which you won't
+                  be able to recover from our database.
+                </Text>
+                <View className="flex-row gap-1 items-center mt-5">
+                  <Text className="text-white text-sm">
+                    If you are sure, please type
+                  </Text>
+                  <Text className="text-red-500 text-sm">DELETE</Text>
+                  <Text className="text-white text-sm">below</Text>
+                </View>
+                <TextInput
+                  className="font-poppins w-full text-md text-white border border-white px-2 py-2 mt-2 rounded-xl"
+                  placeholder="type DELETE here"
+                  textAlignVertical="center"
+                  cursorColor="#d4d4d4"
+                  placeholderTextColor="#737373"
+                  onChangeText={(text) => {
+                    setDeleteString(text);
+                    setDeleteResponseMessage("");
+                  }}
+                  returnKeyType="done"
+                  returnKeyLabel="Confirm"
+                  onSubmitEditing={deleteAccountHandler}
+                />
+                {deleteResponseMessage && (
+                  <Text className="text-center text-sm mt-2 text-red-500">
+                    {deleteResponseMessage}
+                  </Text>
+                )}
+                <View className="w-full mt-5 flex-row gap-1 items-center">
+                  <AnimatedButton
+                    onPress={() => setShowDeleteAccountModal(false)}
+                  >
+                    <Text className="text-sm text-black">Cancel</Text>
+                  </AnimatedButton>
+                  <AnimatedButton
+                    onPress={deleteAccountHandler}
+                    overrideStyles
+                    innerClassName="w-fit gap-1 rounded-xl py-2 px-3 bg-red-500 flex-row items-center justify-center"
+                  >
+                    <Text className="text-white text-sm">Confirm</Text>
+                  </AnimatedButton>
+                </View>
+              </ModalBody>
+            </ModalContent>
+          </Modal>
         </ScrollView>
       </View>
     </KeyboardHandelingView>

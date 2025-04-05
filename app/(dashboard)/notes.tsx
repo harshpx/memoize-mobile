@@ -26,9 +26,9 @@ const Note = ({ note }: any) => {
           <Pin color="white" size={12} />
         </View>
       )}
-      <View className="max-h-52 min-h-36 overflow-hidden">
-        <Text className="text-white text-lg">{note?.title}</Text>
-        <Text className="text-white text-sm">{note?.content}</Text>
+      <View className="max-h-52 min-h-36 overflow-hidden flex-col gap-1">
+        <Text className="text-white text-xl">{note?.title}</Text>
+        <Text className="text-white text-[10px]">{note?.content}</Text>
       </View>
     </AnimatedButton>
   );
@@ -80,9 +80,7 @@ const NotesPage = () => {
   }, []);
 
   useEffect(() => {
-    const displayNotes = user?.notes
-      ?.reverse()
-      ?.filter((note: any) => !note.deleted);
+    const displayNotes = user?.notes?.filter((note: any) => !note.deleted);
     setPinnedNotes(displayNotes?.filter((note: any) => note?.pinned) || []);
     setUnpinnedNotes(displayNotes?.filter((note: any) => !note?.pinned) || []);
   }, [user]);

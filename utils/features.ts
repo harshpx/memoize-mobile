@@ -214,3 +214,20 @@ export const updatePassword = async (
   });
   return await response.json();
 };
+
+// @url /user/delete-user
+// @method DELETE
+// @param {string} token
+// @returns {Promise}
+// @protected true
+// @description Delete user account
+export const deleteUser = async (token: string) => {
+  const response = await fetch(`${BASE_URL}/user/delete-user`, {
+    method: "DELETE",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+    },
+  });
+  return await response.json();
+};
