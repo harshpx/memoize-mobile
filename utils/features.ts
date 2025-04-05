@@ -140,6 +140,12 @@ export const syncUserData = async (user: Object, token: string) => {
   return await response.json();
 };
 
+// @url /user/send-reset-password
+// @method POST
+// @param {string} email
+// @returns {Promise}
+// @protected false
+// @description Send reset password email
 export const sendResetPasswordEmail = async (email: string) => {
   const response = await fetch(`${BASE_URL}/user/send-reset-password`, {
     method: "POST",
@@ -147,6 +153,64 @@ export const sendResetPasswordEmail = async (email: string) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ email }),
+  });
+  return await response.json();
+};
+
+// @url /user/update-username
+// @method PUT
+// @param {string} username, {string} token
+// @returns {Promise}
+// @protected true
+// @description Update user's username
+export const updateUsername = async (username: string, token: string) => {
+  const response = await fetch(`${BASE_URL}/user/update-username`, {
+    method: "PUT",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username }),
+  });
+  return await response.json();
+};
+
+// @url /user/update-email
+// @method PUT
+// @param {string} email, {string} token
+// @returns {Promise}
+// @protected true
+// @description Update user's email
+export const updateEmail = async (email: string, token: string) => {
+  const response = await fetch(`${BASE_URL}/user/update-email`, {
+    method: "PUT",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+  return await response.json();
+};
+
+// @url /user/update-password
+// @method PUT
+// @param {string} password, {string} token
+// @returns {Promise}
+// @protected true
+// @description Update user's password
+export const updatePassword = async (
+  currentPassword: string,
+  newPassword: string,
+  token: string,
+) => {
+  const response = await fetch(`${BASE_URL}/user/update-password`, {
+    method: "PUT",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
   });
   return await response.json();
 };

@@ -17,7 +17,7 @@ import { Text } from "@/components/ui/text";
 import { AppContext } from "@/utils/AppContext";
 import { syncNotes, syncUserData } from "@/utils/features";
 import { storage } from "@/utils/methods";
-import { Link, Stack, usePathname } from "expo-router";
+import { Link, Stack, usePathname, useRouter } from "expo-router";
 import {
   CloudUpload,
   ListTodo,
@@ -25,6 +25,7 @@ import {
   NotepadText,
   Palette,
   Pin,
+  Settings,
   Trash,
 } from "lucide-react-native";
 import { useContext, useEffect, useState } from "react";
@@ -32,6 +33,7 @@ import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 
 const Footer = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, setUser, token, setToken, isOnline } = useContext(AppContext);
   const [showActionsheet, setShowActionsheet] = useState(false);
 
@@ -139,19 +141,29 @@ const Footer = () => {
           </ActionsheetDragIndicatorWrapper>
           <View className="my-5 flex flex-col gap-5 items-center justify-center">
             <View className="relative">
-              <Avatar className="w-40 h-40">
+              <Avatar className="w-44 h-44">
                 <AvatarFallbackText>{user?.username}</AvatarFallbackText>
                 <AvatarImage source={{ uri: user?.avatar?.url }} />
               </Avatar>
-              <View className="absolute bottom-2 right-2">
-                <AvatarSelector />
-              </View>
             </View>
-            <Text className="text-xl">Hi {user?.username}!</Text>
+            <View className="flex-col items-center justify-center">
+              <Text className="text-3xl">Hi {user?.username}!</Text>
+              <Text className="text-neutral-400">{`(${user?.email})`}</Text>
+            </View>
             <View className="flex-row gap-2">
               <AnimatedButton innerClassName="w-24">
                 <Text className="text-black text-sm">Sync</Text>
                 <CloudUpload color="black" size={18} />
+              </AnimatedButton>
+              <AnimatedButton
+                onPress={() => {
+                  setShowActionsheet(false);
+                  router.push("/settings");
+                }}
+                innerClassName="w-24"
+              >
+                <Text className="text-black text-sm">Settings</Text>
+                <Settings color="black" size={18} />
               </AnimatedButton>
               <AnimatedButton onPress={logoutHandler} innerClassName="w-24">
                 <Text className="text-black text-sm">Logout</Text>

@@ -202,8 +202,8 @@ const RegisterForm = () => {
           {registerResponseMessage}
         </Text>
       )}
-      {/* Username Field */}
       <View className="w-full flex-row justify-between gap-2">
+        {/* Username Field */}
         <FormControl isInvalid={!!errors.username} className="w-[48%]">
           <FormControlLabel>
             <FormControlLabelText>Username</FormControlLabelText>

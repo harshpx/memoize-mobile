@@ -49,7 +49,10 @@ const AvatarSelector = () => {
         innerClassName="rounded-full p-1.5 bg-black border border-white"
         overrideStyles
       >
-        <Pen color="white" size={22} />
+        <View className="flex-row items-center gap-1 px-1">
+          <Pen color="white" size={16} />
+          <Text className="text-[8px]">{`Change\navatar`}</Text>
+        </View>
       </AnimatedButton>
       <Modal
         isOpen={showAvatarModal}

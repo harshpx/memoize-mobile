@@ -1,11 +1,12 @@
 import AnimatedButton from "@/components/custom/AnimatedButton";
 import ColorSelector from "@/components/custom/ColorSelector";
 import KeyboardHandelingView from "@/components/custom/KeyboardHandelingView";
+import { Text } from "@/components/ui/text";
 import { AppContext } from "@/utils/AppContext";
 import { syncNotes } from "@/utils/features";
 import { storage } from "@/utils/methods";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { Code, Pin, PinOff, Trash } from "lucide-react-native";
+import { ChevronLeft, Code, Pin, PinOff, Trash } from "lucide-react-native";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Platform, View, ScrollView, TextInput } from "react-native";
 
@@ -45,6 +46,11 @@ const Note = () => {
     const goBackTrigger = navigation.addListener("beforeRemove", updateHandler);
     return () => goBackTrigger();
   }, [navigation, title, content, color, pinned]);
+
+  const goBackHandler = async () => {
+    navigation.goBack();
+    await updateHandler();
+  };
 
   const updateHandler = async () => {
     newNote.title = title;
@@ -151,12 +157,16 @@ const Note = () => {
           }`}
           // keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: 100,
-            gap: 15,
-          }}
+          contentContainerClassName="flex-1 gap-4 pb-[100px]"
         >
+          <AnimatedButton
+            onPress={goBackHandler}
+            overrideStyles
+            innerClassName="flex-row items-center py-2"
+          >
+            <ChevronLeft color="white" size={22} />
+            <Text className="text-white">Notes</Text>
+          </AnimatedButton>
           <TextInput
             className="font-poppins w-full text-3xl text-white"
             style={{ lineHeight: 50 }}

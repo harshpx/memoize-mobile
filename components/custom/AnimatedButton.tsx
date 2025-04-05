@@ -13,6 +13,7 @@ const AnimatedButton = ({
   innerStyle = {},
   intensity = 0.9,
   overrideStyles = false,
+  disabled = false,
 }: any) => {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -25,13 +26,14 @@ const AnimatedButton = ({
       onPressOut={() => (scale.value = withSpring(1))}
       onPress={onPress}
       className={outerClassName}
+      disabled={disabled}
     >
       <Animated.View
         style={[animatedStyle, innerStyle]}
         className={`${
           overrideStyles
-            ? `${innerClassName}`
-            : `rounded-xl py-2 px-3 bg-neutral-300 flex-row items-center justify-center ${innerClassName}`
+            ? `${disabled ? " opacity-70" : ""}${innerClassName}`
+            : `${disabled ? " opacity-70" : ""} rounded-xl py-2 px-3 bg-neutral-300 flex-row items-center justify-center ${innerClassName}`
         }`}
       >
         {children}
