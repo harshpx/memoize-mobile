@@ -2,7 +2,7 @@
   "expo": {
     "name": "memoize",
     "slug": "memoize",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/memoize.png",
     "scheme": "myapp",
@@ -38,7 +38,10 @@
           "resizeMode": "contain",
           "backgroundColor": "#000000"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
